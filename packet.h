@@ -4,16 +4,27 @@
 #include <stdint.h>
 
 #define MAX_PAYLOAD_SIZE 1400
+#define modulo_k 8
 
+enum ARQ_type{
+    STOP_AND_WAIT,
+    GO_BACK_N,
+    SELECTIVE
+};
 
-struct packet_header{
+enum packet_type{
+    DATA_PACKET,
+    ACK_PACKET
+};
+
+struct __attribute__((packed)) packet_header{
     uint8_t type; // 0-data , 1-acknoledgment
     uint32_t seq_num;
     uint16_t payload_length;
     uint32_t checksum;
 };
 
-struct data_packet{
+struct __attribute__((packed)) data_packet{
     struct packet_header header;
     char payload[MAX_PAYLOAD_SIZE];
 };

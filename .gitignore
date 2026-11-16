@@ -1,0 +1,15 @@
+# Ignore all text files
+*.txt
+
+# Ignore your compiled output folder (Recommended for Linux)
+bin/
+build/
+
+# Ignore standard Linux output defaults
+a.out
+*.out
+
+
+# specific ones
+sender
+receiver
