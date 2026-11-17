@@ -3,18 +3,12 @@
 
 #include <stdint.h>
 
-#define MAX_PAYLOAD_SIZE 1400
-#define modulo_k 8
-
-enum ARQ_type{
-    STOP_AND_WAIT,
-    GO_BACK_N,
-    SELECTIVE
-};
+#define MAX_PAYLOAD_SIZE 1400 // this is unavoidable
 
 enum packet_type{
     DATA_PACKET,
-    ACK_PACKET
+    ACK_PACKET,
+    FIN_PACKET
 };
 
 struct __attribute__((packed)) packet_header{
