@@ -1,0 +1,11 @@
+# Smoke test scenario with all impairment types enabled (5% each)
+link_rate_bps = 1000000
+queue_capacity = 128
+prop_delay_ms = 20
+jitter_ms = 2
+data_loss = 0.05
+ack_loss = 0.05
+corrupt = 0.05
+duplicate = 0.05
+reorder = 0.05
+reorder_timeout_ms = 50
