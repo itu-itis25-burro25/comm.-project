@@ -13,7 +13,9 @@ void update_RTT_estimator(struct timeval send_time ,
                           struct timeval recv_time,
                           double* srtt,
                           double* rtt_variation,
-                          double* rto);
+                          double* rto,
+                          double max_rto,
+                          double min_rto);
 double tv_to_sec(struct timeval* t);
 
 #endif

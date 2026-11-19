@@ -8,6 +8,9 @@
 static struct option long_options[] = {
         {"emulatorPort" , required_argument , NULL , EMULATOR_PORT},
         {"emulatorIP" , required_argument , NULL , EMULATOR_IP},
+        {"minimumRTO" , required_argument , NULL , MIN_RTO},
+        {"maximumRTO" , required_argument , NULL , MAX_RTO},
+        {"logFileName" , required_argument , NULL , LOG_FILE_NAME},
         {NULL, 0, NULL, 0}  
 };
 
@@ -18,10 +21,15 @@ void defaults_configurations(struct configuration* config){
     config->k = 8;
     config->max_payload = 1024;
     config->max_retries = 3;
-    config->window_size = 0;
+    config->window_size = 1;
     
     strcpy(config->file_name , "default_fileInput.txt");
+    strcpy(config->log_file_name , "default_senderLog.txt");
+
     strcpy(config->emulator_IP , "127.0.0.1");
+
+    config->min_rto = 1.0;
+    config->max_rto = 60.0;
 
     return;
 }
@@ -46,6 +54,9 @@ void parse_configurations(struct configuration* config , int argc , char* argv[]
                     config->arq_type = GO_BACK_N;
                 }else if(strcmp(optarg , "SELECTIVE") == 0){
                     config->arq_type = SELECTIVE;
+                }else {
+                    fprintf(stderr, "Invalid ARQ protocol\n");
+                    exit(EXIT_FAILURE);
                 }
 
                 break;
@@ -60,6 +71,15 @@ void parse_configurations(struct configuration* config , int argc , char* argv[]
                 break;
             case EMULATOR_IP:
                 strcpy(config->emulator_IP , optarg);
+                break;
+            case MIN_RTO:
+                config->min_rto = atof(optarg);
+                break;
+            case MAX_RTO:
+                config->max_rto = atof(optarg);
+                break;
+            case LOG_FILE_NAME:
+                strcpy(config->log_file_name , optarg);
                 break;
             default:
                 printf("ERROR: unknown parameter!\n");
@@ -81,3 +101,4 @@ void parse_configurations(struct configuration* config , int argc , char* argv[]
     }
 
 }
+

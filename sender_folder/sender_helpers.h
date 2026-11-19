@@ -2,8 +2,15 @@
 #define _SENDER_HELPERS_H
 
 #include <unistd.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <sys/time.h>
+#include <sys/socket.h>
+#include <stdbool.h>
+#include <netinet/in.h>
+
+#include "packet.h"
+#
 
 enum ack_result{
     ACK_OK,

@@ -29,6 +29,9 @@ struct configuration {
 
     int receiver_port;
     char receiver_IP[50];
+
+    double timeout_duration;
+    double linger_duration;
 };
 
 void defaults_configurations(struct configuration* config);

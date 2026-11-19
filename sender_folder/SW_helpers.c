@@ -9,9 +9,10 @@
 #include "crc32.h"
 #include "utilities.h"
 #include "sender_helpers.h"
+#include "logger.h"
 
 static bool transmit_until_acked(int sockfd , struct sockaddr_in* emulator_addr , struct data_packet* packet , 
-                                 size_t packet_size , uint32_t seq_num , struct configuration* config , double* srtt ,
+                                 size_t packet_size , uint32_t seq_num , const struct configuration* config , double* srtt ,
                                  double* rtt_variation , double* rto){
 
     bool has_been_transmitted = false;
@@ -24,26 +25,31 @@ static bool transmit_until_acked(int sockfd , struct sockaddr_in* emulator_addr 
         if(!send_packet(sockfd , emulator_addr , packet , packet_size)){
             return false;
         }
+        log_normal_event(EV_SEND_DATA , seq_num, packet_size , has_been_transmitted);
 
         double deadline = tv_to_sec(&send_time) + *rto;
         enum ack_result result = wait_for_ack(sockfd , seq_num , deadline , &recv_time);
 
         if(result == ACK_ERROR) return false;
-        if(result = ACK_OK){
+        if(result == ACK_OK){
             if(!has_been_transmitted){
-                update_RTT_estimator(send_time , recv_time , srtt , rtt_variation , rto);
+                update_RTT_estimator(send_time , recv_time , srtt , rtt_variation , rto , config->max_rto , config->min_rto);
+
+                long rtt_us = (recv_time.tv_sec - send_time.tv_sec) * 1000000L + (recv_time.tv_usec - send_time.tv_usec);
+                log_rtt_event(EV_RTT_SAMPLE , seq_num , rtt_us , (long)(*srtt * 1e6) , (long)(*rto *1e6));
             }
 
             return true;
         }
 
         printf("timeout occured , retries left: %d\n" , config->max_retries - retries);
+        log_rtt_event(EV_TIMEOUT , seq_num , );
 
         *rto *= 2;
         has_been_transmitted = true;
         retries++;
 
-        if(retries >= config->max_retries){
+        if(retries > config->max_retries){
             fprintf(stderr , "Max retries reached , no ACK for seq %u\n" , seq_num);
             return false;
         }

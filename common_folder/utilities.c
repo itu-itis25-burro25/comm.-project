@@ -1,9 +1,10 @@
 #include <string.h>
 
 #include "utilities.h"
+#include "crc32.h"
 
 void init_sockaddrr_in(struct sockaddr_in* s , const char* IP_address , uint16_t port){
-    memset(s , 0 , sizeof(s));
+    memset(s , 0 , sizeof(*s));
 
     s->sin_addr.s_addr = inet_addr(IP_address);
     s->sin_port = htons(port);
@@ -26,7 +27,9 @@ void update_RTT_estimator(struct timeval send_time ,
                           struct timeval recv_time,
                           double* srtt,
                           double* rtt_variation,
-                          double* rto){
+                          double* rto,
+                          double max_rto,
+                          double min_rto){
 
     double m = (double)(recv_time.tv_sec - send_time.tv_sec) + 
                                (double)(recv_time.tv_usec - send_time.tv_usec) / 1000000.0;
@@ -46,8 +49,12 @@ void update_RTT_estimator(struct timeval send_time ,
 
     *rto = *srtt + 4.0 * (*rtt_variation);
 
-    if (*rto < 0.1) {
-        *rto = 0.1;
+    if (*rto < min_rto) {
+        *rto = min_rto;
+    }
+
+    if(*rto > max_rto){
+        *rto = max_rto;
     }
 
 

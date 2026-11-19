@@ -21,17 +21,22 @@ void defaults_configurations(struct configuration* config){
     config->arq_type = STOP_AND_WAIT;
     config->k = 8;
     config->max_payload = 1024;
-    config->window_size = 0;
+    config->window_size = 1;
     
     strcpy(config->file_name , "default_fileOutput.txt");
+
     strcpy(config->emulator_IP , "127.0.0.1");
+    strcpy(config->receiver_IP , "127.0.0.1");
+
+    config->timeout_duration = 20;
+    config->linger_duration = 5;
 
     return;
 }
 void parse_configurations(struct configuration* config , int argc , char* argv[]){
 
     int opt = 0;
-    while((opt = getopt_long(argc , argv , "f:k:p:q:w:" , long_options , NULL)) != -1){
+    while((opt = getopt_long(argc , argv , "f:k:p:q:w:t:l:" , long_options , NULL)) != -1){
         switch(opt){
             case 'f':
                 strcpy(config->file_name , optarg);
@@ -49,11 +54,20 @@ void parse_configurations(struct configuration* config , int argc , char* argv[]
                     config->arq_type = GO_BACK_N;
                 }else if(strcmp(optarg , "SELECTIVE") == 0){
                     config->arq_type = SELECTIVE;
+                }else {
+                    fprintf(stderr, "Invalid ARQ protocol\n");
+                    exit(EXIT_FAILURE);
                 }
 
                 break;
             case 'w':
                 config->window_size = atoi(optarg);
+                break;
+            case 't':
+                config->timeout_duration = atof(optarg);
+                break;
+            case 'l':
+                config->linger_duration = atof(optarg);
                 break;
             case EMULATOR_PORT:
                 config->emulator_port = atoi(optarg);
