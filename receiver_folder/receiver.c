@@ -11,6 +11,7 @@
 #include "receiver_config.h"
 #include "utilities.h"
 #include "SW_receiver.h"
+#include "logger.h"
 
 
 int main(int argc , char* argv[]){
@@ -21,6 +22,11 @@ int main(int argc , char* argv[]){
     FILE* file = fopen(config.file_name , "wb");
     if(!file){
         printf("couldn't open file\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if(!open_logFile(config.log_file_name)){
+        printf("failed to open log file\n");
         exit(EXIT_FAILURE);
     }
 
@@ -53,6 +59,7 @@ int main(int argc , char* argv[]){
     }
 
     fclose(file);
+    close_logFile();
     close(sockfd);
     return 0;
 

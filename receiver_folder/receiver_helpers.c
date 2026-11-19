@@ -7,6 +7,7 @@
 #include "receiver_helpers.h"
 #include "crc32.h"
 #include "utilities.h"
+#include "logger.h"
 
 bool set_receive_timeout(int sockfd , double seconds){
     struct timeval tv;
@@ -81,6 +82,7 @@ bool send_ack(int sockfd , struct sockaddr_in* destination_addr , uint32_t ack_n
         return false;
     }
 
+    log_normal_event(EV_ACK_SEND , ack_num , ack_size , -1);
     return true;
 }
 
@@ -101,6 +103,7 @@ void linger_and_reack__fin(int sockfd , uint32_t fin_seq , double linger_seconds
 
         if(packet.header.type == FIN_PACKET && packet.header.seq_num == fin_seq){
             send_ack(sockfd , &source_addr , fin_seq);
+            log_normal_event(EV_FIN_REACK , fin_seq , -1 , -1);
         }
     }
 }

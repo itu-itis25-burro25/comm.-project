@@ -22,7 +22,10 @@ int main(int argc, char* argv[]){
         exit(EXIT_FAILURE);
     }
     
-    open_logFile(config.log_file_name);
+    if(!open_logFile(config.log_file_name)){
+        printf("failed to open log file\n");
+        exit(EXIT_FAILURE);
+    }
 
     int sockfd;
     if((sockfd = socket(AF_INET , SOCK_DGRAM , 0)) < 0){

@@ -18,6 +18,8 @@ static bool transmit_until_acked(int sockfd , struct sockaddr_in* emulator_addr 
     bool has_been_transmitted = false;
     int retries = 0;
 
+     enum log_event_type send_event = (packet->header.type == FIN_PACKET) ? EV_SEND_FIN : EV_SEND_DATA;
+
     while(1){
         struct timeval send_time , recv_time;
         gettimeofday(&send_time , NULL);
@@ -25,13 +27,14 @@ static bool transmit_until_acked(int sockfd , struct sockaddr_in* emulator_addr 
         if(!send_packet(sockfd , emulator_addr , packet , packet_size)){
             return false;
         }
-        log_normal_event(EV_SEND_DATA , seq_num, packet_size , has_been_transmitted);
+        log_normal_event(send_event , seq_num, packet_size , has_been_transmitted);
 
         double deadline = tv_to_sec(&send_time) + *rto;
         enum ack_result result = wait_for_ack(sockfd , seq_num , deadline , &recv_time);
 
         if(result == ACK_ERROR) return false;
         if(result == ACK_OK){
+            log_normal_event(EV_ACK_RECV , seq_num , -1 , -1);
             if(!has_been_transmitted){
                 update_RTT_estimator(send_time , recv_time , srtt , rtt_variation , rto , config->max_rto , config->min_rto);
 
@@ -43,9 +46,13 @@ static bool transmit_until_acked(int sockfd , struct sockaddr_in* emulator_addr 
         }
 
         printf("timeout occured , retries left: %d\n" , config->max_retries - retries);
-        log_rtt_event(EV_TIMEOUT , seq_num , );
+
+        long srtt_us = (*srtt < 0) ? -1 : (long)(*srtt * 1e6);
+        log_rtt_event(EV_TIMEOUT , seq_num , -1 , srtt_us , (long)(*rto * 1e6));  
 
         *rto *= 2;
+        if(*rto > config->max_rto) *rto = config->max_rto;
+
         has_been_transmitted = true;
         retries++;
 

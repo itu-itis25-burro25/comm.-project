@@ -21,7 +21,7 @@ bool open_logFile(char const* const file_name){
     }
 
     setvbuf(log_file , NULL , _IOLBF , 0);
-    fprintf(log_file , "time_us , event , seq , bytes , is_retransmission , rtt_us , srtt_us , rto_us\n");
+    fprintf(log_file , "time_us,event,seq,bytes,is_retransmission,rtt_us,srtt_us,rto_us\n");
 
     return true;
 }
@@ -36,34 +36,43 @@ static char* event_to_string(enum log_event_type event, char* string, size_t max
 
     const char *name;
     switch (event) {
-        case EV_SEND_DATA:   name = "EV_SEND_DATA";   break;
-        case EV_SEND_FIN:    name = "EV_SEND_FIN";    break;
-        case EV_ACK_RECV:    name = "EV_ACK_RECV";    break;
-        case EV_AKC_STALE:   name = "EV_AKC_STALE";   break;
-        case EV_ACK_CORRUPT: name = "EV_ACK_CORRUPT"; break;
-        case EV_TIMEOUT:     name = "EV_TIMEOUT";     break;
-        case EV_RTT_SAMPLE:  name = "EV_RTT_SAMPLE";  break;
-        default:             name = "EV_UNKNOWN";     break;
+        case EV_SEND_DATA:   name = "SEND_DATA";   break;
+        case EV_SEND_FIN:    name = "SEND_FIN";    break;
+        case EV_ACK_RECV:    name = "ACK_RECV";    break;
+        case EV_AKC_STALE:   name = "AKC_STALE";   break;
+        case EV_ACK_CORRUPT: name = "ACK_CORRUPT"; break;
+        case EV_TIMEOUT:     name = "TIMEOUT";     break;
+        case EV_RTT_SAMPLE:  name = "RTT_SAMPLE";  break;
+
+        case EV_RECV_DATA:    name = "RECV_DATA";    break;
+        case EV_REVC_DUP:     name = "RECV_DUP";     break;
+        case EV_RECV_CORRUPT: name = "RECV_CORRUPT"; break;
+        case EV_ACK_SEND:     name = "ACK_SEND";     break;
+        case EV_FIN_RECV:     name = "FIN_RECV";     break;
+        case EV_FIN_REACK:    name = "FIN_REACK";    break;
+
+        default:             name = "UNKNOWN";     break;
     }
 
     snprintf(string, max_len, "%s", name);
     return string;
 }
 
-static void write_row(enum log_event_type event , long seq_num , long bytes , bool is_retransmission , long rtt_us , long srtt_us , long rto_us){
+static void write_row(enum log_event_type event , long seq_num , long bytes , int is_retransmission , long rtt_us , long srtt_us , long rto_us){
     
     char event_str[100];
     event_to_string(event , event_str , 100);
 
-    fprintf(log_file , "%lld , %s , %ld , %d , %ld , %ld , %ld \n" ,
-         (long long)now_us() , event_str , event_str , seq_num , bytes , is_retransmission ,
+    fprintf(log_file , "%lld,%s,%ld,%ld,%d,%ld,%ld,%ld\n" ,
+         (long long)now_us() , event_str ,  seq_num , bytes , is_retransmission ,
         rtt_us , srtt_us , rto_us);
 }
 
-void log_normal_event(enum log_event_type event , long seq_num , long bytes , bool is_retransmission){
+void log_normal_event(enum log_event_type event , long seq_num , long bytes , int is_retransmission){
     write_row(event , seq_num , bytes , is_retransmission , -1 , -1 , -1);
 }
 
 void log_rtt_event(enum log_event_type event , long seq_num , long rtt_us , long srtt_us , long rto_us){
     write_row(event , seq_num , -1 , -1 , rtt_us , srtt_us , rto_us);
 }
+

@@ -10,13 +10,14 @@ static struct option long_options[] = {
         {"emulatorIP" , required_argument , NULL , EMULATOR_IP},
         {"receiverPort" , required_argument , NULL , RECEIVER_PORT},
         {"receiverIP" , required_argument , NULL , RECEIVER_IP},
+        {"logFileName" , required_argument ,NULL , LOG_FILE_NAME},
         {NULL, 0, NULL, 0}  
 };
 
 void defaults_configurations(struct configuration* config){
 
-    config->emulator_port = 5000;
-    config->receiver_port = 8000;
+    config->emulator_port = 8000;
+    config->receiver_port = 5000;
     
     config->arq_type = STOP_AND_WAIT;
     config->k = 8;
@@ -24,6 +25,7 @@ void defaults_configurations(struct configuration* config){
     config->window_size = 1;
     
     strcpy(config->file_name , "default_fileOutput.txt");
+    strcpy(config->log_file_name , "default_receiverLog.txt");
 
     strcpy(config->emulator_IP , "127.0.0.1");
     strcpy(config->receiver_IP , "127.0.0.1");
@@ -80,6 +82,9 @@ void parse_configurations(struct configuration* config , int argc , char* argv[]
                 break;
             case RECEIVER_IP:
                 strcpy(config->receiver_IP , optarg);
+                break;
+            case LOG_FILE_NAME:
+                strcpy(config->log_file_name , optarg);
                 break;
             default:
                 printf("ERROR: unknown parameter!\n");

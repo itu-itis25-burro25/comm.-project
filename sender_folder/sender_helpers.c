@@ -8,6 +8,7 @@
 #include "sender_helpers.h"
 #include "crc32.h"
 #include "utilities.h"
+#include "logger.h"
 
 
 bool is_ack_valid(struct data_packet* ack , size_t packet_size){
@@ -54,6 +55,7 @@ enum ack_result wait_for_ack(int sockfd , uint32_t exp_seq , double deadline , s
 
         if(!is_ack_valid(&ack , recv_bytes)){
             printf("corrupt/invalid ACK(ignored)\n");
+            log_normal_event(EV_ACK_CORRUPT , -1 , recv_bytes , -1);
             continue;
         }
 
@@ -63,6 +65,7 @@ enum ack_result wait_for_ack(int sockfd , uint32_t exp_seq , double deadline , s
         }
 
         printf("old/wrong ACK ignored (seq: %u)\n" , ack.header.seq_num);
+        log_normal_event(EV_AKC_STALE , ack.header.seq_num , recv_bytes , -1);
     }
 }
 bool send_packet(int sockfd , struct sockaddr_in* emulator_address , struct data_packet* packet , size_t packet_size){
