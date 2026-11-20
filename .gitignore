@@ -13,3 +13,8 @@ a.out
 # specific ones
 sender
 receiver
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
