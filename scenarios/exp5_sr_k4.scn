@@ -1,0 +1,15 @@
+# Experiment 5: Deterministic Selective Repeat sequence-number limit test for k=4 (2^4 = 16)
+# Drops the ACK for the 1st packet (seq 0).
+# SR works intact for W in {1..8}, and fails deterministically at W = 9 (2^(k-1) + 1).
+link_rate_bps = 1000000
+queue_capacity = 128
+prop_delay_ms = 20
+jitter_ms = 0
+data_loss = 0
+ack_loss = 0
+corrupt = 0
+duplicate = 0
+reorder = 0
+reorder_timeout_ms = 50
+
+action R2S pkt 1 drop
